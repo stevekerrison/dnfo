@@ -97,6 +97,14 @@ The next time the container is recreated and the labels applied (i.e. `docker co
 | `dnfo.table.name`      | `dnfo_firewall_table` | String, valid netfilter table name      | The table name to use for the chains. This avoids conflicting with any tables used by the Docker daemon (such as `docker-dns`). You are unlikely to want to change this.            |
 | `dnfo.custom.nftables` |                       | Multi-line netfilter configuration file | Write the full netfilter config file that will be loaded yourself. You must handle table clearing on refresh, etc.                                                                  |
 
+## Security
+
+Consider the following:
+
+- The operator has root privileges on the host. I may tighten its permissions somewhat in the future in the systemd unit, but it's still going to have significant privileges against all containers, which may very well themselves have the ability to control the host if they are mis-configured.
+- These `netfilter` rules are applied inside each container's network namespace. That means if the container has permission, it can modify its own firewall rules. As such, docker's de-coupled host-based firewalling is preferred wherever possible (i.e. use standard docker networking and port declarations, not macvlan).
+- One area to check is whether specially crafted labels could be abused when the operator script processes them.
+
 ## Bugs?
 
 Open an issue or PR and I'll take a look.
